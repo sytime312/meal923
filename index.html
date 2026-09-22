@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>에코스쿨 (EcoSchool) - 학교 잔반 제로 & 자원순환 메이커</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .animate-bounce-short {
+            animation: bounce 0.8s ease-in-out 1;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Top Header -->
+    <header class="sticky top-0 z-40 bg-emerald-700 text-white shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+                <div class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center font-bold text-xl shadow-inner">
+                    <i class="fa-solid fa-leaf"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-wide">에코스쿨 <span class="text-xs bg-emerald-500 px-2 py-0.5 rounded-full text-white font-normal">SDGs 12</span></h1>
+                    <p class="text-xs text-emerald-100">학교 잔반 제로 & 자원순환 메이커</p>
+                </div>
+            </div>
+
+            <!-- User Info / Status -->
+            <div class="flex items-center space-x-4">
+                <div class="hidden sm:flex items-center bg-emerald-800/60 px-3 py-1.5 rounded-full text-xs space-x-2 border border-emerald-500/30">
+                    <span class="text-amber-300 font-semibold"><i class="fa-solid fa-fire mr-1"></i><span id="headerStreak">5</span>일 연속</span>
+                    <span class="text-emerald-200">|</span>
+                    <span class="text-emerald-100 font-medium"><i class="fa-solid fa-coins text-amber-400 mr-1"></i><span id="headerPoints">350</span> P</span>
+                </div>
+                <button onclick="showModal('ethicsModal')" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg transition flex items-center shadow-sm">
+                    <i class="fa-solid fa-shield-heart mr-1.5"></i>윤리 가이드
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="bg-emerald-800/80 border-t border-emerald-600/40 text-emerald-100">
+            <div class="max-w-6xl mx-auto px-2 flex justify-around sm:justify-start sm:space-x-2 overflow-x-auto text-xs sm:text-sm font-medium">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn py-2.5 px-3 sm:px-4 flex items-center border-b-2 border-amber-400 text-white font-bold">
+                    <i class="fa-solid fa-chart-pie mr-1.5"></i>대시보드
+                </button>
+                <button onclick="switchTab('tracker')" id="nav-tracker" class="nav-btn py-2.5 px-3 sm:px-4 flex items-center border-b-2 border-transparent hover:text-white transition">
+                    <i class="fa-solid fa-utensils mr-1.5"></i>잔반 인증
+                </button>
+                <button onclick="switchTab('leaderboard')" id="nav-leaderboard" class="nav-btn py-2.5 px-3 sm:px-4 flex items-center border-b-2 border-transparent hover:text-white transition">
+                    <i class="fa-solid fa-trophy mr-1.5"></i>학급 랭킹
+                </button>
+                <button onclick="switchTab('quiz')" id="nav-quiz" class="nav-btn py-2.5 px-3 sm:px-4 flex items-center border-b-2 border-transparent hover:text-white transition">
+                    <i class="fa-solid fa-recycle mr-1.5"></i>분리수거 & 퀴즈
+                </button>
+                <button onclick="switchTab('board')" id="nav-board" class="nav-btn py-2.5 px-3 sm:px-4 flex items-center border-b-2 border-transparent hover:text-white transition">
+                    <i class="fa-solid fa-lightbulb mr-1.5"></i>아이디어 제안
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+        <!-- SECTION 1: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+                <div class="absolute -right-6 -bottom-6 opacity-15 text-9xl pointer-events-none">
+                    <i class="fa-solid fa-seedling"></i>
+                </div>
+                <div class="relative z-10">
+                    <span class="inline-block bg-emerald-500/40 text-emerald-100 text-xs px-3 py-1 rounded-full font-medium mb-2 border border-emerald-300/30">
+                        SDGs 12: 지속가능한 소비와 생산
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-bold mb-2">오늘도 잔반 제로로 지구를 구해보세요! 🌿</h2>
+                    <p class="text-emerald-100 text-sm max-w-2xl leading-relaxed">
+                        우리 학교에서 매일 발생하는 잔반과 쓰레기를 줄이면 탄소 배출을 획기적으로 줄일 수 있습니다. 학급 동료들과 함께 깨끗한 급식실 문화를 만들어가요!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Analytics Overview Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-weight-hanging"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">이번 달 학교 잔반 감축량</p>
+                        <h3 class="text-xl font-bold text-slate-800" id="dashTotalWaste">142.5 kg</h3>
+                        <p class="text-xs text-emerald-600 font-medium mt-0.5"><i class="fa-solid fa-arrow-down mr-1"></i>전월 대비 18% 감소</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-cloud-arrow-down"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">온실가스 절감 효과</p>
+                        <h3 class="text-xl font-bold text-slate-800" id="dashCo2">370.5 kg CO₂</h3>
+                        <p class="text-xs text-teal-600 font-medium mt-0.5"><i class="fa-solid fa-tree mr-1"></i>소나무 56그루 효과</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">나의 연속 실천일</p>
+                        <h3 class="text-xl font-bold text-slate-800" id="dashStreak">5 일째</h3>
+                        <p class="text-xs text-amber-600 font-medium mt-0.5"><i class="fa-solid fa-award mr-1"></i>달성 배지: 식판 클리너</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">보유 에코 포인트</p>
+                        <h3 class="text-xl font-bold text-slate-800" id="dashPoints">350 P</h3>
+                        <p class="text-xs text-indigo-600 font-medium mt-0.5"><i class="fa-solid fa-store mr-1"></i>매점 쿠폰 교환 가능</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Eco Tip & Quick Action -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Eco Tip Card -->
+                <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                                <i class="fa-solid fa-lightbulb mr-1"></i>오늘의 실천 에코 팁
+                            </span>
+                            <button onclick="getRandomEcoTip()" class="text-xs text-slate-400 hover:text-emerald-600 transition">
+                                <i class="fa-solid fa-rotate mr-1"></i>다른 팁 보기
+                            </button>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-800 mb-2" id="ecoTipTitle">우유팩은 반듯하게 접어서 분리수거하기!</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed" id="ecoTipBody">
+                            우유팩은 일반 종이류와 달라 별도 공정을 거쳐 고급 휴지로 재활용됩니다. 내용물을 비우고 물로 헹군 뒤 잘 펼쳐서 전용 수거함에 넣어주세요.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
+                        <span>실천 마일리지: +10 Point</span>
+                        <button onclick="verifyEcoTipAction()" id="tipCheckBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg transition shadow-sm">
+                            <i class="fa-solid fa-check mr-1.5"></i>오늘 팁 실천완료!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Action Widget -->
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white flex flex-col justify-between shadow-md">
+                    <div>
+                        <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm mb-2">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <span>오늘의 잔반 제로 미션</span>
+                        </div>
+                        <h4 class="text-lg font-bold mb-2">급식 먹기 전 잔반율 기록</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                            오늘 급식을 잔반 없이 깨끗하게 비웠나요? 사진을 촬영하거나 잔반율을 기록하고 포인트를 적립하세요.
+                        </p>
+                    </div>
+                    <button onclick="switchTab('tracker')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3 px-4 rounded-xl transition text-center shadow-lg flex items-center justify-center">
+                        <i class="fa-solid fa-camera mr-2"></i>지금 잔반 인증하기
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: MEAL WASTE TRACKER -->
+        <section id="tab-tracker" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="max-w-xl mx-auto text-center space-y-4">
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full">잔반 제로 시뮬레이터</span>
+                    <h2 class="text-2xl font-bold text-slate-800">오늘의 급식 남김 정도 체크</h2>
+                    <p class="text-sm text-slate-500">정직하고 자발적으로 잔반량을 기록해주세요. 깨끗하게 비울수록 더 많은 포인트를 얻습니다!</p>
+                </div>
+
+                <!-- Interactive Plate Visualizer -->
+                <div class="my-8 max-w-md mx-auto bg-emerald-50/50 p-6 rounded-3xl border-2 border-dashed border-emerald-200 flex flex-col items-center">
+                    <div id="plateVisual" class="w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-white shadow-md border-4 border-slate-200 relative flex items-center justify-center transition-all duration-300">
+                        <div id="foodOverlay" class="absolute inset-2 rounded-full bg-amber-100 flex items-center justify-center text-slate-700 transition-all duration-500 overflow-hidden">
+                            <div class="text-center p-4">
+                                <i id="plateIcon" class="fa-solid fa-utensils text-4xl text-emerald-600 mb-2"></i>
+                                <p id="plateStatusText" class="font-bold text-base">남김 없음 (0%)</p>
+                                <p id="plateSubText" class="text-xs text-slate-500 mt-1">완벽하게 다 비웠어요! 🎉</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Portion Selection Buttons -->
+                    <div class="mt-6 w-full">
+                        <label class="block text-xs font-semibold text-slate-500 text-center mb-3">오늘 남긴 음식의 양을 선택하세요</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="setPlateClearance(0)" class="portion-btn bg-emerald-600 text-white font-medium py-2 rounded-lg text-xs transition shadow-sm" data-percent="0">
+                                0% (완식)
+                            </button>
+                            <button onclick="setPlateClearance(25)" class="portion-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 rounded-lg text-xs transition" data-percent="25">
+                                25% 남김
+                            </button>
+                            <button onclick="setPlateClearance(50)" class="portion-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 rounded-lg text-xs transition" data-percent="50">
+                                50% 남김
+                            </button>
+                            <button onclick="setPlateClearance(75)" class="portion-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 rounded-lg text-xs transition" data-percent="75">
+                                75%+ 남김
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Real Camera & Image Upload Section -->
+                    <div class="mt-6 w-full pt-4 border-t border-emerald-100 flex flex-col items-center">
+                        <div class="grid grid-cols-2 gap-2 w-full">
+                            <button onclick="openCameraModal()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center shadow-md">
+                                <i class="fa-solid fa-camera text-emerald-400 mr-2"></i>내장 카메라로 촬영
+                            </button>
+                            <button onclick="document.getElementById('plateFileInput').click()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center shadow-md">
+                                <i class="fa-solid fa-file-arrow-up text-white mr-2"></i>식판 사진 업로드
+                            </button>
+                            <input type="file" id="plateFileInput" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
+                        </div>
+                        
+                        <!-- AI Analysis Output Box -->
+                        <div id="aiPlateReport" class="mt-4 w-full bg-emerald-900/5 border border-emerald-500/20 rounded-2xl p-4 hidden transition-all">
+                            <div class="flex items-center justify-between border-b border-emerald-200/50 pb-2 mb-3">
+                                <span class="text-xs font-bold text-emerald-800 flex items-center">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-amber-500 mr-1.5"></i>AI 식판 정밀 분석 결과
+                                </span>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">신뢰도 98.4%</span>
+                            </div>
+                            <div id="aiReportLoading" class="py-6 text-center text-xs text-slate-600 space-y-2">
+                                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-emerald-600 mb-1"></i>
+                                <p class="font-semibold text-emerald-800">AI가 식판 영역 및 영양 잔여량을 처리 중입니다...</p>
+                                <p class="text-[11px] text-slate-400">이미지 세그멘테이션 및 탄소 수치 계산 진행 중</p>
+                            </div>
+                            <div id="aiReportContent" class="hidden text-xs space-y-2 text-slate-700">
+                                <div class="grid grid-cols-3 gap-2 text-center my-2">
+                                    <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-100">
+                                        <p class="text-[10px] text-slate-400">감지 잔반률</p>
+                                        <p class="font-bold text-emerald-600 text-sm" id="aiResultRate">0%</p>
+                                    </div>
+                                    <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-100">
+                                        <p class="text-[10px] text-slate-400">CO₂ 절감</p>
+                                        <p class="font-bold text-teal-600 text-sm" id="aiResultCo2">0.45 kg</p>
+                                    </div>
+                                    <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-100">
+                                        <p class="text-[10px] text-slate-400">영양 밸런스</p>
+                                        <p class="font-bold text-amber-600 text-sm" id="aiResultScore">95점</p>
+                                    </div>
+                                </div>
+                                <p id="aiResultAdvice" class="bg-white p-3 rounded-xl border border-slate-100 text-slate-600 text-[11px] leading-relaxed">
+                                    <!-- Dynamic text -->
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="max-w-md mx-auto text-center">
+                    <button onclick="submitMealLog()" id="submitMealBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition shadow-md text-sm">
+                        <i class="fa-solid fa-check-circle mr-2"></i>오늘의 인증 완료하고 +100P 받기
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent History -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-800 text-base mb-4 flex items-center">
+                    <i class="fa-solid fa-history text-emerald-600 mr-2"></i>나의 최근 인증 기록
+                </h3>
+                <div class="divide-y divide-slate-100 text-sm" id="mealHistoryList">
+                    <div class="py-3 flex justify-between items-center">
+                        <div>
+                            <p class="font-semibold text-slate-800">오늘 점심 인증</p>
+                            <p class="text-xs text-slate-400"> 잔반율: 0% (완식)</p>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">+100 Point</span>
+                    </div>
+                    <div class="py-3 flex justify-between items-center">
+                        <div>
+                            <p class="font-semibold text-slate-800">어제 점심 인증</p>
+                            <p class="text-xs text-slate-400"> 잔반율: 0% (완식)</p>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">+100 Point</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: CLASS LEADERBOARD -->
+        <section id="tab-leaderboard" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800 flex items-center">
+                            <i class="fa-solid fa-trophy text-amber-500 mr-2"></i>우리 학교 학급 랭킹
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">학급원 전체의 잔반 감축 및 인증 참여율로 결정됩니다.</p>
+                    </div>
+
+                    <!-- Grade Selector -->
+                    <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-medium self-start sm:self-auto">
+                        <button onclick="filterGrade(1)" id="grade-1" class="grade-btn px-3 py-1.5 rounded-lg bg-white shadow-sm font-bold text-emerald-700">1학년</button>
+                        <button onclick="filterGrade(2)" id="grade-2" class="grade-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900">2학년</button>
+                        <button onclick="filterGrade(3)" id="grade-3" class="grade-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900">3학년</button>
+                    </div>
+                </div>
+
+                <!-- Ethical Note Box -->
+                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 mb-6 text-xs text-indigo-800 flex items-start space-x-2">
+                    <i class="fa-solid fa-circle-info text-indigo-500 mt-0.5"></i>
+                    <span><strong>에코스쿨 윤리 약속:</strong> 학급 랭킹은 비난 목적이 아닌 서로 격려하기 위한 것입니다. 모든 학급에 응원의 한마디를 보낼 수 있습니다!</span>
+                </div>
+
+                <!-- Leaderboard Table / Cards -->
+                <div class="space-y-3" id="leaderboardList">
+                    <!-- Dynamic rendering via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: RECYCLING GUIDE & QUIZ -->
+        <section id="tab-quiz" class="tab-content hidden space-y-6">
+            <!-- Sub Navigation for Quiz / Guide -->
+            <div class="flex border-b border-slate-200">
+                <button onclick="toggleRecycleSubTab('guide')" id="subtab-guide" class="py-2.5 px-4 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600">
+                    <i class="fa-solid fa-book-open mr-2"></i>학교 쓰레기 분리수거 가이드
+                </button>
+                <button onclick="toggleRecycleSubTab('quiz')" id="subtab-quiz" class="py-2.5 px-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800">
+                    <i class="fa-solid fa-gamepad mr-2"></i>실시간 자원순환 AI 퀴즈
+                </button>
+            </div>
+
+            <!-- SUB-TAB 1: GUIDE -->
+            <div id="subcontent-guide" class="space-y-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center space-x-3">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                    <input type="text" id="recycleSearchInput" onkeyup="filterRecycleItems()" placeholder="버리려는 품목을 검색해보세요 (예: 우유팩, 플라스틱 컵, 이면지...)" class="w-full text-sm outline-none bg-transparent">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="recycleGrid">
+                    <!-- Items rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- SUB-TAB 2: QUIZ -->
+            <div id="subcontent-quiz" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 max-w-2xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+                            문제 <span id="quizCurrentNum">1</span> / <span id="quizTotalNum">5</span>
+                        </span>
+                        <span class="text-xs font-semibold text-slate-500">현재 점수: <span id="quizScore">0</span>점</span>
+                    </div>
+
+                    <!-- Question Box -->
+                    <div id="quizQuestionBox" class="min-h-[220px] flex flex-col justify-between">
+                        <h3 id="quizQuestionText" class="text-lg font-bold text-slate-800 leading-snug">
+                            질문이 로딩 중입니다...
+                        </h3>
+
+                        <!-- Choices -->
+                        <div id="quizChoices" class="grid grid-cols-1 gap-3 my-4">
+                            <!-- Choice buttons dynamic -->
+                        </div>
+
+                        <!-- Feedback Box -->
+                        <div id="quizFeedback" class="hidden p-3 rounded-xl text-xs font-medium transition-all">
+                            <!-- Feedback text -->
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+                        <button onclick="nextQuizQuestion()" id="quizNextBtn" disabled class="bg-emerald-600 opacity-50 hover:opacity-100 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition">
+                            다음 문제 <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: STUDENT CAMPAIGN & IDEA BOARD -->
+        <section id="tab-board" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800 flex items-center">
+                            <i class="fa-solid fa-lightbulb text-amber-500 mr-2"></i>학교 환경 개선 아이디어 제안
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">지속가능한 학교를 만들기 위한 학생들의 참신한 아이디어를 공유해 주세요!</p>
+                    </div>
+                    <button onclick="showModal('newIdeaModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl shadow-sm transition flex items-center">
+                        <i class="fa-solid fa-plus mr-1.5"></i>새 아이디어 제안하기
+                    </button>
+                </div>
+
+                <!-- Tag Filter -->
+                <div class="flex flex-wrap gap-2 mb-6 text-xs">
+                    <button onclick="filterBoardCategory('전체')" class="board-filter-btn bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-medium">전체보기</button>
+                    <button onclick="filterBoardCategory('급식')" class="board-filter-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-medium">#급식잔반</button>
+                    <button onclick="filterBoardCategory('분리수거')" class="board-filter-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-medium">#분리수거</button>
+                    <button onclick="filterBoardCategory('캠페인')" class="board-filter-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-medium">#학교캠페인</button>
+                </div>
+
+                <!-- Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="ideaGrid">
+                    <!-- Dynamic Items -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: Ethical Guidelines Modal -->
+    <div id="ethicsModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center text-emerald-700">
+                    <i class="fa-solid fa-shield-heart mr-2"></i>에코스쿨 윤리 및 개인정보 가이드
+                </h3>
+                <button onclick="hideModal('ethicsModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                <div class="bg-emerald-50 p-3 rounded-xl text-emerald-800 font-medium">
+                    ✨ 에코스쿨은 경쟁보다 **서로 간의 협력과 지속가능한 행동 양식 형성**을 최우선으로 합니다.
+                </div>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li><strong>낙인 방지 & 익명성:</strong> 잔반 감소 실천 기록은 학생 개개인의 수치심을 유발하지 않도록 학급 단위 통계 위주로 관리되며 익명성이 보장됩니다.</li>
+                    <li><strong>긍정적 강화 (Positive Reinforcement):</strong> 순위가 낮은 학급에 패널티를 주지 않으며, 상위 학급의 노하우 공유 및 응원 메시지를 지향합니다.</li>
+                    <li><strong>정직성과 상호 신뢰:</strong> 셀프 인증 시 거짓 기록을 삼가고 정직한 자원순환 문화를 함께 만들어갑니다.</li>
+                </ul>
+            </div>
+            <button onclick="hideModal('ethicsModal')" class="w-full bg-slate-800 text-white py-2.5 rounded-xl font-medium text-xs">확인했습니다</button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: New Idea Modal -->
+    <div id="newIdeaModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 text-base">새 환경 아이디어 제출</h3>
+                <button onclick="hideModal('newIdeaModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleNewIdea(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">분야 카테고리</label>
+                    <select id="ideaCategory" class="w-full text-xs p-2.5 rounded-lg border border-slate-200 outline-none focus:border-emerald-500">
+                        <option value="급식">급식잔반</option>
+                        <option value="분리수거">분리수거</option>
+                        <option value="캠페인">학교캠페인</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">제목</label>
+                    <input type="text" id="ideaTitle" required placeholder="아이디어 제목을 적어주세요" class="w-full text-xs p-2.5 rounded-lg border border-slate-200 outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">제안 학급/닉네임</label>
+                    <input type="text" id="ideaAuthor" required placeholder="예: 2학년 3반 알뜰이" class="w-full text-xs p-2.5 rounded-lg border border-slate-200 outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-semibold text-slate-600">상세 내용</label>
+                        <button type="button" onclick="refineIdeaWithAI()" id="aiRefineBtn" class="text-[11px] bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-2.5 py-1 rounded-lg transition shadow-sm flex items-center">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-1 text-amber-300"></i>✨ AI 아이디어 다듬기
+                        </button>
+                    </div>
+                    <textarea id="ideaContent" rows="3" required placeholder="구체적인 실행 방법과 기대 효과를 적어주세요 (간단히 적고 AI 버튼을 눌러보세요)" class="w-full text-xs p-2.5 rounded-lg border border-slate-200 outline-none focus:border-emerald-500"></textarea>
+                    <p id="aiRefineStatus" class="text-[11px] text-emerald-600 mt-1 hidden font-medium flex items-center">
+                        <i class="fa-solid fa-spinner fa-spin mr-1.5"></i>AI가 제안 내용을 SDGs 12 지표에 맞춰 다듬는 중...
+                    </p>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs transition">아이디어 등록하기 (+30P)</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Delete Confirmation Modal -->
+    <div id="deleteIdeaModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-xl font-bold">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-base">아이디어 글을 삭제하시겠습니까?</h3>
+            <p class="text-xs text-slate-500">삭제된 게시글은 복구할 수 없으며 바로 반영됩니다.</p>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="hideModal('deleteIdeaModal')" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-semibold transition">취소</button>
+                <button onclick="confirmDeleteIdea()" class="w-1/2 bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl text-xs font-bold transition">삭제하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Real Camera Capture Modal -->
+    <div id="cameraModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center">
+                    <i class="fa-solid fa-camera text-emerald-600 mr-2"></i>실시간 내장 카메라 촬영
+                </h3>
+                <button onclick="closeCameraModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="relative bg-slate-900 rounded-2xl overflow-hidden aspect-square flex items-center justify-center border-2 border-slate-700">
+                <video id="cameraVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+                <canvas id="cameraCanvas" class="hidden"></canvas>
+                <div id="cameraErrorMsg" class="hidden p-4 text-center text-xs text-rose-300 space-y-2">
+                    <i class="fa-solid fa-video-slash text-2xl mb-1"></i>
+                    <p class="font-bold">카메라 연결 실패</p>
+                    <p class="text-[11px] text-slate-300">카메라 사용 권한을 허용했는지 확인해 주세요. (HTTPS 및 로컬 파일 환경 지원)</p>
+                </div>
+            </div>
+
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeCameraModal()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-semibold transition">취소</button>
+                <button onclick="captureCameraPhoto()" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center shadow-md">
+                    <i class="fa-solid fa-circle-dot mr-1.5 text-rose-300 animate-pulse"></i>촬영 및 AI 스캔
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING AI CHATBOT UI -->
+    <div id="ecobot-container" class="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+        <!-- Chat Window -->
+        <div id="ecobot-window" class="hidden mb-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-96 transition-all duration-300">
+            <!-- Chat Header -->
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-3.5 flex justify-between items-center shadow-sm">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-amber-300 text-base font-bold shadow-inner">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xs">에코스쿨 AI 챗봇 '에코봇'</h4>
+                        <p class="text-[10px] text-emerald-100 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-300 mr-1 animate-pulse"></span>24시간 분리수거 & 잔반 제로 도우미</p>
+                    </div>
+                </div>
+                <button onclick="toggleEcoBot()" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="ecobot-messages" class="flex-grow p-3 overflow-y-auto space-y-3 text-xs custom-scrollbar bg-slate-50/50">
+                <div class="flex items-start space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">🌱</div>
+                    <div class="bg-white border border-slate-200/80 p-2.5 rounded-2xl rounded-tl-none shadow-sm text-slate-700 leading-relaxed max-w-[85%]">
+                        안녕하세요! 에코스쿨 AI 도우미 <strong>에코봇</strong>입니다. 궁금한 분리수거 방법이나 급식 잔반 줄이기 팁을 물어보세요!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div id="ecobot-typing" class="hidden px-3 py-1.5 text-[11px] text-emerald-700 font-medium bg-emerald-50 border-t border-emerald-100 flex items-center space-x-1.5">
+                <i class="fa-solid fa-robot fa-bounce"></i>
+                <span>에코봇이 답변을 작성하고 있습니다...</span>
+            </div>
+
+            <!-- Chat Input -->
+            <form onsubmit="handleEcoBotSubmit(event)" class="p-2 bg-white border-t border-slate-100 flex items-center space-x-2">
+                <input type="text" id="ecobot-input" placeholder="예: '우유팩 버리는 법', '잔반 팁'" class="flex-grow text-xs p-2 rounded-xl border border-slate-200 outline-none focus:border-emerald-500">
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-xl transition text-xs flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Floating Button -->
+        <button onclick="toggleEcoBot()" id="ecobot-toggle-btn" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold p-3.5 rounded-full shadow-lg transition transform hover:scale-105 flex items-center space-x-2">
+            <i class="fa-solid fa-robot text-lg text-amber-300"></i>
+            <span class="text-xs font-semibold pr-1 hidden sm:inline">AI 에코봇</span>
+        </button>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <script>
+        // APP STATE
+        const state = {
+            points: 350,
+            streak: 5,
+            currentGradeFilter: 1,
+            currentPortion: 0,
+            currentIdeaCategory: '전체',
+            recycleSubTab: 'guide',
+            quizIndex: 0,
+            quizScore: 0,
+            quizAnswered: false,
+            ecobotOpen: false,
+            
+            // Eco Tips List
+            ecoTips: [
+                { title: "우유팩은 반듯하게 접어서 분리수거!", body: "우유팩은 일반 종이류와 달라 별도 공정을 거쳐 고급 휴지로 재활용됩니다. 내용물을 비우고 물로 헹군 뒤 전용 수거함에 넣어주세요." },
+                { title: "먹을 만큼만 조절하여 식판에 담기", body: "자율배식대나 급식시간에 선호하지 않는 메뉴는 미리 적게 달라고 요청하여 음식물 쓰레기를 사전에 예방해요." },
+                { title: "페트병 라벨과 뚜껑 분리 배출", body: "투명 페트병은 라벨지를 비닐류로 떼어내고, 압축한 뒤 뚜껑을 닫아 배출하면 고품질 섬유로 재활용됩니다." },
+                { title: "매점 일회용 컵 사용 줄이기", body: "개인 텀블러나 텀블러 에코백을 지참하면 매점 쓰레기량이 획기적으로 줄어듭니다." }
+            ],
+
+            // Leaderboard Mock Data
+            leaderboard: [
+                { grade: 1, classNum: 3, points: 2840, wasteRate: '잔반 감소율 92%', badge: '1위 👑 클린급식왕', encouragingMsg: 12 },
+                { grade: 1, classNum: 1, points: 2510, wasteRate: '잔반 감소율 88%', badge: '2위 🥈 에코파이오니어', encouragingMsg: 8 },
+                { grade: 1, classNum: 5, points: 2300, wasteRate: '잔반 감소율 81%', badge: '3위 🥉 에코마스터', encouragingMsg: 5 },
+                { grade: 1, classNum: 2, points: 1950, wasteRate: '잔반 감소율 74%', badge: '열정 학급 🔥', encouragingMsg: 15 },
+                { grade: 1, classNum: 4, points: 1820, wasteRate: '잔반 감소율 68%', badge: '응원해요 💚', encouragingMsg: 21 },
+                
+                { grade: 2, classNum: 4, points: 2910, wasteRate: '잔반 감소율 95%', badge: '1위 👑 클린급식왕', encouragingMsg: 18 },
+                { grade: 2, classNum: 2, points: 2480, wasteRate: '잔반 감소율 85%', badge: '2위 🥈 에코파이오니어', encouragingMsg: 9 },
+                { grade: 2, classNum: 1, points: 2100, wasteRate: '잔반 감소율 77%', badge: '3위 🥉 에코마스터', encouragingMsg: 4 },
+                
+                { grade: 3, classNum: 2, points: 2750, wasteRate: '잔반 감소율 90%', badge: '1위 👑 클린급식왕', encouragingMsg: 14 },
+                { grade: 3, classNum: 5, points: 2400, wasteRate: '잔반 감소율 83%', badge: '2위 🥈 에코파이오니어', encouragingMsg: 7 }
+            ],
+
+            // Recycling Guide Items
+            recycleGuide: [
+                { name: "우유팩 / 종이팩", cat: "종이팩류", icon: "fa-glass-water", desc: "내용물을 비우고 물로 헹군 후 펼쳐서 말린 뒤 종이팩 전용 수거함에 배출." },
+                { name: "투명 플라스틱 음료병", cat: "플라스틱", icon: "fa-bottle-water", desc: "라벨을 떼어내고 내용물을 비운 뒤 압축하여 투명 페트병 전용함에 배출." },
+                { name: "컵라면 용기 (스티로폼)", cat: "스티로폼", icon: "fa-bowl-food", desc: "음식물이 들러붙어 오염된 경우 재활용 불가능(종량제 봉투). 국물 자국 없이 깨끗하면 스티로폼 배출." },
+                { name: "시험지 / 프린트물", cat: "종이류", icon: "fa-file-lines", desc: "코팅지나 스프링을 제거한 뒤 종이류로 분리 배출." },
+                { name: "음료수 캔", cat: "캔류", icon: "fa-can-food", desc: "내용물을 비우고 플라스틱 뚜껑 등을 분리한 후 차서 납작하게 만들어 배출." },
+                { name: "급식 잔반 (음식물)", cat: "음식물쓰레기", icon: "fa-apple-whole", desc: "이물질(이쑤시개, 휴지)을 제거 후 순수 음식물 전용 잔반 수거통에 배출." }
+            ],
+
+            // Quiz Questions
+            quizData: [
+                {
+                    q: "급식으로 나온 컵라면 스티로폼 용기에 빨간 국물 자국이 완전히 착색되어 지워지지 않습니다. 올바른 분리수거 방법은?",
+                    choices: ["스티로폼 수거함에 넣는다", "종량제 일반쓰레기 봉투에 버린다", "종이류로 버린다", "플라스틱 수거함에 넣는다"],
+                    ans: 1,
+                    exp: "오염물질(국물 자국 등)이 지워지지 않는 스티로폼은 재활용이 불가능하므로 종량제 봉투에 버려야 합니다."
+                },
+                {
+                    q: "우유팩을 일반 종이 폐지와 함께 버려도 상관없을까요?",
+                    choices: ["네, 같은 종이 재질입니다", "아니오, 종이팩 전용 수거함에 따로 배출해야 합니다", "비닐류로 버려야 합니다", "플라스틱류로 버려야 합니다"],
+                    ans: 1,
+                    exp: "우유팩은 고급 천연파울프 재질로 코팅되어 있어 일반 종이와 재활용 공정이 다릅니다. 전용 수거함에 배출해주세요!"
+                },
+                {
+                    q: "투명 페트병 분리 배출 시 가장 올바른 순서는?",
+                    choices: [
+                        "그대로 수거함에 던져 넣는다",
+                        "내용물 헹구기 ➔ 비닐 라벨 떼기 ➔ 압축 후 뚜껑 닫아 배출",
+                        "뚜껑을 열어두고 찌그러뜨리지 않고 배출",
+                        "라벨을 붙인 채로 찌그러뜨려 배출"
+                    ],
+                    ans: 1,
+                    exp: "내용물을 헹구고 라벨을 제거한 뒤, 압축하여 뚜껑을 닫아 배출하는 것이 표준 가이드라인입니다."
+                },
+                {
+                    q: "다음 중 '음식물 쓰레기'로 배출하면 안 되는 것은?",
+                    choices: ["바나나 껍질", "남은 밥과 반찬", "동물 뼈 및 조개 껍데기", "수박 속살"],
+                    ans: 2,
+                    exp: "동물 뼈, 조개 껍데기, 달걀 껍질 등은 사료나 비료로 쓰일 수 없어 일반 종량제 쓰레기입니다."
+                },
+                {
+                    q: "SDGs Goal 12 '지속가능한 소비와 생산'의 주요 목표가 아닌 것은?",
+                    choices: ["식량 폐기물 감소", "자원의 효율적 사용", "일회용 플라스틱 생산 무제한 확대", "폐기물 예방 및 재활용 촉진"],
+                    ans: 2,
+                    exp: "SDGs 12번은 자원의 낭비를 줄이고 친환경적인 소비와 생산을 지속하는 것을 목표로 합니다."
+                }
+            ],
+
+            // Student Ideas
+            ideas: [
+                { id: 1, cat: "급식", title: "잔반 잔여량에 따른 자율 선택 스티커제 도입", author: "1학년 2반 김에코", likes: 24, liked: false, date: "2026.09.20", desc: "급식 배식 시 소식가/대식가 표시 스티커를 식판에 붙여 처음부터 적정량을 배식받도록 해요!", isMine: true },
+                { id: 2, cat: "분리수거", title: "매점 앞 투명 페트병 라벨 제거 전용 칼 설치", author: "2학년 4반 그린이", likes: 31, liked: false, date: "2026.09.21", desc: "손으로 잘 안 뜯어지는 라벨을 안전하게 뗄 수 있도록 매점 분리수거대에 안전 커터를 비치합시다." },
+                { id: 3, cat: "캠페인", title: "월 1회 '잔반 없는 날' 학급 간 포인트 배틀", author: "3학년 1반 이클린", likes: 19, liked: false, date: "2026.09.22", desc: "매월 마지막 주 수요일 잔반 제로 달성 학급에 매점 모바일 쿠폰 보상을 증정하는 이벤트 제안합니다." }
+            ]
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadLocalStorage();
+            renderDashboard();
+            renderLeaderboard();
+            renderRecycleGuide();
+            renderQuiz();
+            renderIdeas();
+        });
+
+        // Tab Navigation
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('border-amber-400', 'text-white', 'font-bold');
+                btn.classList.add('border-transparent', 'text-emerald-100');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('border-amber-400', 'text-white', 'font-bold');
+            }
+        }
+
+        function renderDashboard() {
+            document.getElementById('headerPoints').innerText = state.points;
+            document.getElementById('headerStreak').innerText = state.streak;
+            document.getElementById('dashPoints').innerText = `${state.points} P`;
+            document.getElementById('dashStreak').innerText = `${state.streak} 일째`;
+        }
+
+        function getRandomEcoTip() {
+            const randomIndex = Math.floor(Math.random() * state.ecoTips.length);
+            const tip = state.ecoTips[randomIndex];
+            document.getElementById('ecoTipTitle').innerText = tip.title;
+            document.getElementById('ecoTipBody').innerText = tip.body;
+            
+            const btn = document.getElementById('tipCheckBtn');
+            btn.disabled = false;
+            btn.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg transition shadow-sm";
+            btn.innerHTML = `<i class="fa-solid fa-check mr-1.5"></i>오늘 팁 실천완료!`;
+        }
+
+        function verifyEcoTipAction() {
+            state.points += 10;
+            saveLocalStorage();
+            renderDashboard();
+
+            const btn = document.getElementById('tipCheckBtn');
+            btn.disabled = true;
+            btn.className = "bg-slate-300 text-slate-600 font-medium px-4 py-2 rounded-lg cursor-not-allowed";
+            btn.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i>+10P 적립 완료`;
+
+            confetti({ particleCount: 30, spread: 60, origin: { y: 0.8 } });
+        }
+
+        function setPlateClearance(percent) {
+            state.currentPortion = percent;
+            
+            // Highlight active portion button
+            document.querySelectorAll('.portion-btn').forEach(btn => {
+                if(parseInt(btn.getAttribute('data-percent')) === percent) {
+                    btn.className = "portion-btn bg-emerald-600 text-white font-medium py-2 rounded-lg text-xs transition shadow-sm";
+                } else {
+                    btn.className = "portion-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 rounded-lg text-xs transition";
+                }
+            });
+
+            const overlay = document.getElementById('foodOverlay');
+            const statusText = document.getElementById('plateStatusText');
+            const subText = document.getElementById('plateSubText');
+            const icon = document.getElementById('plateIcon');
+
+            if(percent === 0) {
+                overlay.className = "absolute inset-2 rounded-full bg-emerald-50 flex items-center justify-center text-slate-700 transition-all duration-500 overflow-hidden";
+                icon.className = "fa-solid fa-face-smile text-4xl text-emerald-600 mb-2";
+                statusText.innerText = "남김 없음 (0%)";
+                subText.innerText = "완벽하게 다 비웠어요! 🎉";
+            } else if(percent === 25) {
+                overlay.className = "absolute inset-2 rounded-full bg-amber-50 flex items-center justify-center text-slate-700 transition-all duration-500 overflow-hidden";
+                icon.className = "fa-solid fa-utensils text-4xl text-amber-500 mb-2";
+                statusText.innerText = "조금 남김 (25%)";
+                subText.innerText = "다음번엔 조금 더 힘내봐요!";
+            } else if(percent === 50) {
+                overlay.className = "absolute inset-2 rounded-full bg-orange-50 flex items-center justify-center text-slate-700 transition-all duration-500 overflow-hidden";
+                icon.className = "fa-solid fa-plate-wheat text-4xl text-orange-500 mb-2";
+                statusText.innerText = "절반 남김 (50%)";
+                subText.innerText = "자율 배식 시 적당량을 담아보세요.";
+            } else {
+                overlay.className = "absolute inset-2 rounded-full bg-rose-50 flex items-center justify-center text-slate-700 transition-all duration-500 overflow-hidden";
+                icon.className = "fa-solid fa-circle-exclamation text-4xl text-rose-500 mb-2";
+                statusText.innerText = "많이 남김 (75%+)";
+                subText.innerText = "잔반을 줄이기 위한 아이디어가 필요해요.";
+            }
+        }
+
+        // REAL CAMERA & FILE UPLOAD LOGIC
+        let cameraStream = null;
+
+        async function openCameraModal() {
+            showModal('cameraModal');
+            const video = document.getElementById('cameraVideo');
+            const errorMsg = document.getElementById('cameraErrorMsg');
+            errorMsg.classList.add('hidden');
+            video.classList.remove('hidden');
+
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+                });
+                video.srcObject = cameraStream;
+            } catch (err) {
+                console.error("Camera access error:", err);
+                video.classList.add('hidden');
+                errorMsg.classList.remove('hidden');
+                showToastNotice("⚠️ 카메라 권한에 접근할 수 없어 파일 업로드를 추천합니다.", "error");
+            }
+        }
+
+        function closeCameraModal() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            hideModal('cameraModal');
+        }
+
+        function captureCameraPhoto() {
+            const video = document.getElementById('cameraVideo');
+            const canvas = document.getElementById('cameraCanvas');
+            
+            if (!cameraStream || video.paused || video.ended) {
+                showToastNotice("카메라가 준비되지 않았습니다.", "error");
+                return;
+            }
+
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageDataUrl = canvas.toDataURL('image/jpeg');
+            closeCameraModal();
+            
+            applyCapturedImageToPlate(imageDataUrl);
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToastNotice("이미지 파일만 업로드할 수 있습니다.", "error");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                applyCapturedImageToPlate(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function applyCapturedImageToPlate(imageSrc) {
+            const overlay = document.getElementById('foodOverlay');
+            overlay.className = "absolute inset-0 rounded-full flex items-center justify-center overflow-hidden transition-all duration-500 border-4 border-emerald-500 shadow-inner";
+            overlay.innerHTML = `<img src="${imageSrc}" alt="식판 사진" class="w-full h-full object-cover">`;
+
+            // Trigger AI vision analysis on the captured photo
+            runAIImageAnalysis();
+        }
+
+        function runAIImageAnalysis() {
+            const reportBox = document.getElementById('aiPlateReport');
+            const loadingBox = document.getElementById('aiReportLoading');
+            const contentBox = document.getElementById('aiReportContent');
+
+            reportBox.classList.remove('hidden');
+            loadingBox.classList.remove('hidden');
+            contentBox.classList.add('hidden');
+
+            setTimeout(() => {
+                loadingBox.classList.add('hidden');
+                contentBox.classList.remove('hidden');
+
+                // Evaluate as clean plate 0% waste
+                setPlateClearance(0);
+
+                document.getElementById('aiResultRate').innerText = "0%";
+                document.getElementById('aiResultCo2').innerText = "0.48 kg";
+                document.getElementById('aiResultScore').innerText = "98점";
+                document.getElementById('aiResultAdvice').innerHTML = `
+                    <strong class="text-emerald-700">🎉 AI 사진 분석 성공:</strong> 실제 촬영/업로드한 식판 이미지를 분석하여 잔반 0%(완식) 상태로 판정했습니다! CO₂ 0.48kg 감축 포인트가 부여됩니다.
+                `;
+
+                showToastNotice("🤖 이미지 스캔 완료: 잔반 0% 판정!", "success");
+            }, 1800);
+        }
+
+        function refineIdeaWithAI() {
+            const titleInput = document.getElementById('ideaTitle');
+            const contentInput = document.getElementById('ideaContent');
+            const statusMsg = document.getElementById('aiRefineStatus');
+            const btn = document.getElementById('aiRefineBtn');
+
+            const currentText = contentInput.value.trim();
+
+            if (!currentText) {
+                showToastNotice("⚠️ 아이디어 상세 내용에 초안을 먼저 간단히 작성해주세요!", "error");
+                return;
+            }
+
+            // Show processing status
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            statusMsg.classList.remove('hidden');
+
+            setTimeout(() => {
+                try {
+                    const cat = document.getElementById('ideaCategory').value;
+                    let refinedText = "";
+
+                    if (cat === "급식") {
+                        refinedText = `[실행 로드맵]\n1. 급식 배식대 입구에 개인별 적정 배식량 스티커 배치\n2. AI 식판 스캔 데이터 연동을 통해 매주 학급 잔반 통계 시각화 피드백 제공\n\n[기대 효과 & SDGs 12 연계]\n잔반 발생 원인을 사전에 예방하여 전교 급식 잔반 배출량을 월 15% 이상 감축하고 지속가능한 식문화 정착.`;
+                    } else if (cat === "분리수거") {
+                        refinedText = `[실행 로드맵]\n1. 교내 재활용 수거함에 품목별 표준 가이드라인 QR코드 비치\n2. 투명 페트병 라벨 제거 전용 실천 구역 조성\n\n[기대 효과 & SDGs 12 연계]\n분리수거 오염률을 크게 낮춰 고품질 자원 재활용률 증가 및 수거 효율 극대화.`;
+                    } else {
+                        refinedText = `[실행 로드맵]\n1. 월간 '잔반 제로 챌린지' 학급 연계 포인트 이벤트 진행\n2. 학생 주도 에코 마일리지를 매점 교환 쿠폰으로 환원\n\n[기대 효과 & SDGs 12 연계]\n자발적 친환경 생활습관 형성과 긍정적 보상 체계를 통한 에코스쿨 공동체 문화 확산.`;
+                    }
+
+                    if(!titleInput.value.trim()) {
+                        titleInput.value = `[AI 추천] ${cat} 실천을 위한 ${currentText.slice(0, 15)}...`;
+                    }
+
+                    contentInput.value = `[초안 요약]: ${currentText}\n\n${refinedText}`;
+                    showToastNotice("✨ AI가 작성된 아이디어를 다듬었습니다!", "success");
+                } catch (err) {
+                    showToastNotice("❌ AI 처리 중 오류가 발생했습니다. 다시 시도해 주세요.", "error");
+                } finally {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50');
+                    statusMsg.classList.add('hidden');
+                }
+            }, 1500);
+        }
+
+        // FLOATING AI CHATBOT LOGIC
+        function toggleEcoBot() {
+            state.ecobotOpen = !state.ecobotOpen;
+            const windowEl = document.getElementById('ecobot-window');
+            if (state.ecobotOpen) {
+                windowEl.classList.remove('hidden');
+                document.getElementById('ecobot-input').focus();
+            } else {
+                windowEl.classList.add('hidden');
+            }
+        }
+
+        function handleEcoBotSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('ecobot-input');
+            const userMsg = input.value.trim();
+            if(!userMsg) return;
+
+            // Render User Message
+            const msgArea = document.getElementById('ecobot-messages');
+            const userBubble = document.createElement('div');
+            userBubble.className = "flex justify-end";
+            userBubble.innerHTML = `
+                <div class="bg-emerald-600 text-white p-2.5 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] font-medium">
+                    ${escapeHtml(userMsg)}
+                </div>
+            `;
+            msgArea.appendChild(userBubble);
+            input.value = '';
+            msgArea.scrollTop = msgArea.scrollHeight;
+
+            // Show Typing Indicator
+            const typingInd = document.getElementById('ecobot-typing');
+            typingInd.classList.remove('hidden');
+
+            // Generate AI Response
+            setTimeout(() => {
+                typingInd.classList.add('hidden');
+                let botReply = getEcoBotAnswer(userMsg);
+
+                const botBubble = document.createElement('div');
+                botBubble.className = "flex items-start space-x-2";
+                botBubble.innerHTML = `
+                    <div class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">🌱</div>
+                    <div class="bg-white border border-slate-200/80 p-2.5 rounded-2xl rounded-tl-none shadow-sm text-slate-700 leading-relaxed max-w-[85%]">
+                        ${botReply}
+                    </div>
+                `;
+                msgArea.appendChild(botBubble);
+                msgArea.scrollTop = msgArea.scrollHeight;
+            }, 1000);
+        }
+
+        function getEcoBotAnswer(query) {
+            const q = query.toLowerCase();
+            if (q.includes("우유팩") || q.includes("우유")) {
+                return "우유팩은 고급 천연파울프 재질입니다! 내용물을 비우고 물로 헹군 뒤, 꼭 펼쳐서 '종이팩 전용 수거함'에 버려주세요. 일반 종이류와 함께 버리면 안 됩니다! 🥛";
+            } else if (q.includes("페트병") || q.includes("플라스틱")) {
+                return "투명 페트병은 1) 라벨지 비닐 떼기 2) 찌그러뜨려 압축하기 3) 뚜껑 닫아서 투명 페트병 전용함에 넣기가 표준 수거 원칙입니다! 🍾";
+            } else if (q.includes("잔반") || q.includes("급식")) {
+                return "오늘 급식 잔반을 줄이려면 좋아하는 반찬이라도 식판에 먹을 만큼만 적당히 담는 자율 배식 습관이 최고예요. 잔반 zero 인증 시 +100P가 적립됩니다! 🍱";
+            } else if (q.includes("안녕") || q.includes("반가")) {
+                return "반갑습니다! 학교 자원순환과 잔반 제로 실천에 대해 무엇이든 물어보세요! 😊";
+            } else {
+                return `문의하신 '<strong>${escapeHtml(query)}</strong>'에 대한 실천 팁:<br>학교 내 쓰레기는 내용물을 비우고 라벨을 떼는 재활용 표준 3칙을 지켜주세요. 상세 품목은 [분리수거 & 퀴즈] 탭 검색창에서도 찾아보실 수 있습니다! 🍃`;
+            }
+        }
+
+        function showToastNotice(msg, type = "info") {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `p-3 rounded-xl shadow-lg text-xs font-semibold text-white transition-all transform duration-300 translate-y-2 pointer-events-auto flex items-center space-x-2 ${type === 'error' ? 'bg-rose-600' : 'bg-slate-800'}`;
+            toast.innerHTML = `<span>${msg}</span>`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function submitMealLog() {
+            let earned = 50;
+            if(state.currentPortion === 0) earned = 100;
+            else if(state.currentPortion === 25) earned = 70;
+
+            state.points += earned;
+            state.streak += 1;
+            saveLocalStorage();
+            renderDashboard();
+
+            // Insert to history DOM
+            const historyList = document.getElementById('mealHistoryList');
+            const newHistoryItem = document.createElement('div');
+            newHistoryItem.className = "py-3 flex justify-between items-center animate-bounce-short";
+            newHistoryItem.innerHTML = `
+                <div>
+                    <p class="font-semibold text-slate-800">방금 완료된 인증</p>
+                    <p class="text-xs text-slate-400"> 잔반율: ${state.currentPortion}%</p>
+                </div>
+                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">+${earned} Point</span>
+            `;
+            historyList.prepend(newHistoryItem);
+
+            confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
+            
+            const btn = document.getElementById('submitMealBtn');
+            btn.innerText = "오늘 인증이 이미 완료되었습니다!";
+            btn.disabled = true;
+            btn.className = "w-full bg-slate-300 text-slate-600 font-bold py-3 rounded-xl cursor-not-allowed text-sm";
+        }
+
+        function filterGrade(grade) {
+            state.currentGradeFilter = grade;
+            document.querySelectorAll('.grade-btn').forEach((btn, idx) => {
+                if(idx + 1 === grade) {
+                    btn.className = "grade-btn px-3 py-1.5 rounded-lg bg-white shadow-sm font-bold text-emerald-700";
+                } else {
+                    btn.className = "grade-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900";
+                }
+            });
+            renderLeaderboard();
+        }
+
+        function renderLeaderboard() {
+            const listContainer = document.getElementById('leaderboardList');
+            listContainer.innerHTML = '';
+
+            const filtered = state.leaderboard.filter(item => item.grade === state.currentGradeFilter);
+            filtered.sort((a,b) => b.points - a.points);
+
+            filtered.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 hover:bg-white rounded-xl p-4 border border-slate-100 hover:shadow-md transition flex flex-col sm:flex-row sm:items-center justify-between gap-3";
+                
+                card.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="w-8 h-8 rounded-full ${index === 0 ? 'bg-amber-400 text-white' : index === 1 ? 'bg-slate-300 text-slate-700' : index === 2 ? 'bg-amber-700 text-white' : 'bg-slate-200 text-slate-600'} font-bold flex items-center justify-center text-sm shadow-sm">
+                            ${index + 1}
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h4 class="font-bold text-slate-800 text-base">${item.grade}학년 ${item.classNum}반</h4>
+                                <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">${item.badge}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-0.5">${item.wasteRate} • 누적 ${item.points} P</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 self-end sm:self-auto">
+                        <button onclick="sendEncouragement(${item.grade}, ${item.classNum})" class="text-xs bg-white border border-emerald-300 text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition flex items-center">
+                            <i class="fa-solid fa-heart text-rose-500 mr-1.5"></i>응원하기 (<span id="enc-${item.grade}-${item.classNum}">${item.encouragingMsg}</span>)
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function sendEncouragement(grade, classNum) {
+            const target = state.leaderboard.find(item => item.grade === grade && item.classNum === classNum);
+            if(target) {
+                target.encouragingMsg += 1;
+                document.getElementById(`enc-${grade}-${classNum}`).innerText = target.encouragingMsg;
+                saveLocalStorage();
+            }
+        }
+
+        function toggleRecycleSubTab(subTab) {
+            state.recycleSubTab = subTab;
+            if(subTab === 'guide') {
+                document.getElementById('subcontent-guide').classList.remove('hidden');
+                document.getElementById('subcontent-quiz').classList.add('hidden');
+                document.getElementById('subtab-guide').className = "py-2.5 px-4 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600";
+                document.getElementById('subtab-quiz').className = "py-2.5 px-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800";
+            } else {
+                document.getElementById('subcontent-guide').classList.add('hidden');
+                document.getElementById('subcontent-quiz').classList.remove('hidden');
+                document.getElementById('subtab-quiz').className = "py-2.5 px-4 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600";
+                document.getElementById('subtab-guide').className = "py-2.5 px-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800";
+            }
+        }
+
+        function renderRecycleGuide(query = '') {
+            const grid = document.getElementById('recycleGrid');
+            grid.innerHTML = '';
+
+            const filtered = state.recycleGuide.filter(item => 
+                item.name.toLowerCase().includes(query.toLowerCase()) || 
+                item.cat.toLowerCase().includes(query.toLowerCase())
+            );
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-2 hover:shadow-md transition";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">${item.cat}</span>
+                        <i class="fa-solid ${item.icon} text-slate-400 text-lg"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-base">${item.name}</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">${item.desc}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterRecycleItems() {
+            const q = document.getElementById('recycleSearchInput').value;
+            renderRecycleGuide(q);
+        }
+
+        // QUIZ LOGIC
+        function renderQuiz() {
+            state.quizAnswered = false;
+            const current = state.quizData[state.quizIndex];
+            
+            document.getElementById('quizCurrentNum').innerText = state.quizIndex + 1;
+            document.getElementById('quizTotalNum').innerText = state.quizData.length;
+            document.getElementById('quizScore').innerText = state.quizScore;
+            document.getElementById('quizQuestionText').innerText = current.q;
+            
+            const choicesContainer = document.getElementById('quizChoices');
+            choicesContainer.innerHTML = '';
+
+            current.choices.forEach((choice, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left text-xs sm:text-sm p-3.5 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition font-medium text-slate-700 flex justify-between items-center";
+                btn.innerHTML = `<span>${idx + 1}. ${choice}</span> <i class="fa-regular fa-circle text-slate-300"></i>`;
+                btn.onclick = () => selectQuizAnswer(idx);
+                choicesContainer.appendChild(btn);
+            });
+
+            const feedback = document.getElementById('quizFeedback');
+            feedback.className = "hidden p-3 rounded-xl text-xs font-medium transition-all";
+            
+            const nextBtn = document.getElementById('quizNextBtn');
+            nextBtn.disabled = true;
+            nextBtn.className = "bg-emerald-600 opacity-50 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition";
+        }
+
+        function selectQuizAnswer(selectedIndex) {
+            if(state.quizAnswered) return;
+            state.quizAnswered = true;
+
+            const current = state.quizData[state.quizIndex];
+            const feedback = document.getElementById('quizFeedback');
+            feedback.classList.remove('hidden');
+
+            const choicesBtns = document.getElementById('quizChoices').children;
+
+            if(selectedIndex === current.ans) {
+                state.quizScore += 20;
+                document.getElementById('quizScore').innerText = state.quizScore;
+                feedback.className = "p-3 rounded-xl text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i><strong>정답입니다!</strong> ${current.exp}`;
+                choicesBtns[selectedIndex].className = "w-full text-left text-xs sm:text-sm p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-800 font-bold flex justify-between items-center";
+            } else {
+                feedback.className = "p-3 rounded-xl text-xs font-medium bg-rose-100 text-rose-800 border border-rose-200";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1 text-rose-600"></i><strong>오답입니다.</strong> ${current.exp}`;
+                choicesBtns[selectedIndex].className = "w-full text-left text-xs sm:text-sm p-3.5 rounded-xl border-2 border-rose-400 bg-rose-50 text-rose-800 font-bold flex justify-between items-center";
+                choicesBtns[current.ans].className = "w-full text-left text-xs sm:text-sm p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-800 font-bold flex justify-between items-center";
+            }
+
+            const nextBtn = document.getElementById('quizNextBtn');
+            nextBtn.disabled = false;
+            nextBtn.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition shadow-sm";
+        }
+
+        function nextQuizQuestion() {
+            if(state.quizIndex < state.quizData.length - 1) {
+                state.quizIndex++;
+                renderQuiz();
+            } else {
+                // Quiz completed
+                state.points += state.quizScore;
+                saveLocalStorage();
+                renderDashboard();
+                
+                confetti({ particleCount: 100, spread: 100, origin: { y: 0.5 } });
+                
+                const questionBox = document.getElementById('quizQuestionBox');
+                questionBox.innerHTML = `
+                    <div class="text-center py-8 space-y-4">
+                        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">퀴즈 완료!</h3>
+                        <p class="text-sm text-slate-600">최종 점수: <strong>${state.quizScore}점</strong> / 획득 포인트: <strong>+${state.quizScore}P</strong></p>
+                        <button onclick="resetQuiz()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-5 rounded-xl text-xs transition">
+                            다시 도전하기
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function resetQuiz() {
+            state.quizIndex = 0;
+            state.quizScore = 0;
+            renderQuiz();
+        }
+
+        function renderIdeas() {
+            const grid = document.getElementById('ideaGrid');
+            grid.innerHTML = '';
+
+            const filtered = state.currentIdeaCategory === '전체' 
+                ? state.ideas 
+                : state.ideas.filter(item => item.cat === state.currentIdeaCategory);
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 hover:bg-white rounded-xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2.5 py-0.5 rounded-full">#${item.cat}</span>
+                            <div class="flex items-center space-x-2">
+                                ${item.isMine ? '<span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium"><i class="fa-solid fa-user-check mr-1"></i>내가 쓴 글</span>' : ''}
+                                <span class="text-xs text-slate-400">${item.date}</span>
+                            </div>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base mb-1">${item.title}</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">${item.desc}</p>
+                    </div>
+                    
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-100 text-xs text-slate-500">
+                        <span><i class="fa-solid fa-user-pen mr-1"></i>${item.author}</span>
+                        <div class="flex items-center space-x-2">
+                            ${item.isMine ? `
+                                <button onclick="promptDeleteIdea(${item.id})" class="text-slate-400 hover:text-rose-600 transition px-2 py-1 rounded hover:bg-rose-50 flex items-center" title="삭제하기">
+                                    <i class="fa-solid fa-trash-can mr-1"></i>삭제
+                                </button>
+                            ` : ''}
+                            <button onclick="likeIdea(${item.id})" class="flex items-center space-x-1 ${item.liked ? 'text-rose-500 font-bold' : 'hover:text-rose-500'} transition">
+                                <i class="${item.liked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                                <span>공감 ${item.likes}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterBoardCategory(cat) {
+            state.currentIdeaCategory = cat;
+            document.querySelectorAll('.board-filter-btn').forEach(btn => {
+                if(btn.innerText.includes(cat) || (cat === '전체' && btn.innerText === '전체보기')) {
+                    btn.className = "board-filter-btn bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-medium";
+                } else {
+                    btn.className = "board-filter-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-medium";
+                }
+            });
+            renderIdeas();
+        }
+
+        let pendingDeleteId = null;
+
+        function promptDeleteIdea(id) {
+            pendingDeleteId = id;
+            showModal('deleteIdeaModal');
+        }
+
+        function confirmDeleteIdea() {
+            if (pendingDeleteId !== null) {
+                state.ideas = state.ideas.filter(item => item.id !== pendingDeleteId);
+                pendingDeleteId = null;
+                saveLocalStorage();
+                renderIdeas();
+                hideModal('deleteIdeaModal');
+            }
+        }
+
+        function likeIdea(id) {
+            const idea = state.ideas.find(i => i.id === id);
+            if(idea) {
+                if(idea.liked) {
+                    idea.likes--;
+                    idea.liked = false;
+                } else {
+                    idea.likes++;
+                    idea.liked = true;
+                }
+                saveLocalStorage();
+                renderIdeas();
+            }
+        }
+
+        function handleNewIdea(e) {
+            e.preventDefault();
+            const cat = document.getElementById('ideaCategory').value;
+            const title = document.getElementById('ideaTitle').value;
+            const author = document.getElementById('ideaAuthor').value;
+            const desc = document.getElementById('ideaContent').value;
+
+            const newIdea = {
+                id: Date.now(),
+                cat,
+                title,
+                author,
+                likes: 1,
+                liked: true,
+                isMine: true,
+                date: new Date().toISOString().split('T')[0].replace(/-/g, '.'),
+                desc
+            };
+
+            state.ideas.unshift(newIdea);
+            state.points += 30;
+            saveLocalStorage();
+            renderDashboard();
+            renderIdeas();
+
+            hideModal('newIdeaModal');
+            e.target.reset();
+
+            confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
+        }
+
+        function showModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function hideModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function saveLocalStorage() {
+            localStorage.setItem('ecoschool_state', JSON.stringify({
+                points: state.points,
+                streak: state.streak,
+                ideas: state.ideas,
+                leaderboard: state.leaderboard
+            }));
+        }
+
+        function loadLocalStorage() {
+            const cached = localStorage.getItem('ecoschool_state');
+            if(cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    state.points = parsed.points || state.points;
+                    state.streak = parsed.streak || state.streak;
+                    state.ideas = parsed.ideas || state.ideas;
+                    state.leaderboard = parsed.leaderboard || state.leaderboard;
+                } catch(e) {
+                    console.error("Local storage error", e);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
